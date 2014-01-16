@@ -27,7 +27,7 @@ temp = os.path.join(settings.JSON_OUT_DIR, 'temp')
 
 for stop_id, departures in stops.items():
     file = open(temp, 'w+')
-    file.write(json.dumps(map(lambda departure: departure.time, departures)))
+    file.write(json.dumps(sorted(map(lambda departure: departure.time, departures))))
     file.flush()
     os.fsync(file)
     file.close()
