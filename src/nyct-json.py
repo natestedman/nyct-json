@@ -21,13 +21,13 @@ for entity in message.entity:
             if stop_id not in stops:
                 stops[stop_id] = []
                 
-            stops[stop_id].append(stop_time_update.departure)
+            stops[stop_id].append(stop_time_update.departure.time)
 
 temp = os.path.join(settings.JSON_OUT_DIR, 'temp')
 
 for stop_id, departures in stops.items():
     file = open(temp, 'w+')
-    file.write(json.dumps(sorted(map(lambda departure: departure.time, departures))))
+    file.write(json.dumps(sorted(departures)))
     file.flush()
     os.fsync(file)
     file.close()
