@@ -25,11 +25,14 @@ for entity in message.entity:
 
 temp = os.path.join(settings.JSON_OUT_DIR, 'temp')
 
-for stop_id, departures in stops.items():
+def write(filename, json):
     file = open(temp, 'w+')
-    file.write(json.dumps(sorted(departures)))
+    file.write(json.dumps(json))
     file.flush()
     os.fsync(file)
     file.close()
     
-    os.rename(temp, os.path.join(settings.JSON_OUT_DIR, stop_id + ".json"))
+    os.rename(temp, filename)
+
+for stop_id, departures in stops.items():
+    write(os.path.join(settings.JSON_OUT_DIR, stop_id + ".json"), sorted(departures))
