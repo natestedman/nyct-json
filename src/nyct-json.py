@@ -18,28 +18,37 @@ stops = {}
 for entity in message.entity:
     if entity.trip_update.trip.route_id == "L":
         for stop_time_update in entity.trip_update.stop_time_update:
+            # find stop identifier and direction
             stop_id = stop_time_update.stop_id
+            prefix = stop_id[:-1]
+            direction = stop_id[-1:]
             
-            if stop_id not in stops:
-                stops[stop_id] = []
-                
-            stops[stop_id].append(stop_time_update.departure.time)
+            # insert empty lists
+            if prefix not in stops:
+                stops[prefix] = { 'N': [], 'S': [] }
+            
+            # add current departure time
+            stops[prefix][direction].append(stop_time_update.departure.time)
 
 # sort departure times
 for stop_id in stops:
-    stops[stop_id].sort()
+    for direction in stops[stop_id]:
+        stops[stop_id][direction].sort()
 
 # write JSON
 temp = os.path.join(settings.JSON_OUT_DIR, 'temp')
 
-def write(filename, json):
+def write(filename, json_representation):
     file = open(temp, 'w+')
-    file.write(json.dumps(json))
+    file.write(json.dumps(json_representation))
     file.flush()
     os.fsync(file)
     file.close()
     
     os.rename(temp, filename)
 
-for stop_id, departures in stops.items():
-    write(os.path.join(settings.JSON_OUT_DIR, stop_id + ".json"), departures)
+for stop_id, directions in stops.items():
+    write(os.path.join(settings.JSON_OUT_DIR, stop_id + ".json"), directions)
+    
+    for direction, departures in directions.items():
+        write(os.path.join(settings.JSON_OUT_DIR, stop_id + direction + ".json"), departures)
