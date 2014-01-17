@@ -6,11 +6,13 @@ import os
 import urllib2
 from proto import gtfs_realtime_pb2
 
+# download MTA data
 message = gtfs_realtime_pb2.FeedMessage()
 url = urllib2.urlopen('http://datamine.mta.info/mta_esi.php?key={0}&feed_id={1}'.format(settings.MTA_API_KEY, settings.MTA_FEED_ID))
 message.ParseFromString(url.read())
 url.close()
 
+# find all departure times and arrange by station
 stops = {}
 
 for entity in message.entity:
@@ -23,6 +25,11 @@ for entity in message.entity:
                 
             stops[stop_id].append(stop_time_update.departure.time)
 
+# sort departure times
+for stop_id in stops:
+    stops[stop_id].sort()
+
+# write JSON
 temp = os.path.join(settings.JSON_OUT_DIR, 'temp')
 
 def write(filename, json):
@@ -35,4 +42,4 @@ def write(filename, json):
     os.rename(temp, filename)
 
 for stop_id, departures in stops.items():
-    write(os.path.join(settings.JSON_OUT_DIR, stop_id + ".json"), sorted(departures))
+    write(os.path.join(settings.JSON_OUT_DIR, stop_id + ".json"), departures)
